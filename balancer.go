@@ -65,7 +65,7 @@ func getOsts(num int, top bool) []Ost {
 
 func readOsts() {
 	var newOsts Osts
-	out, err := exec.Command("lfs", "df", "-l").Output()
+	out, err := exec.Command("lfs", "df", "-l", *filesystemParam).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,7 +147,6 @@ func main() {
 			fi, e := os.Stat(newFile);
 			if e == nil {
 				size := fi.Size()
-				//log.Printf("Migrating file %s of size %d", newFile, size)
 
 				toOstsNum := 1
 				if size > LustreNoStripeSize {
@@ -165,6 +164,7 @@ func main() {
 					toOstsList = append(toOstsList, fmt.Sprintf("%d", curOst.Index))
 				}
 
+				//log.Printf("Migrating file %s of size %d to OSTs %v", newFile, size, toOstsList)
 				err := exec.Command("lfs", "migrate", "-o", strings.Join(toOstsList, ","), newFile).Run()
 				if err != nil {
 					log.Printf("Error doing migrate of file %s: %s", newFile, err)
