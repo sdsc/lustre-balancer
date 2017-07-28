@@ -5,6 +5,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
 	"os"
+	"sync"
 	"os/exec"
 	"sort"
 	"strconv"
@@ -142,7 +143,11 @@ func main() {
 		}
 	}()
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
 		for newFile := range filesChan {
 			fi, e := os.Stat(newFile);
 			if e == nil {
@@ -186,5 +191,7 @@ func main() {
 		log.Fatalf("Error waiting for Cmd", err)
 		os.Exit(1)
 	}
+
+	wg.Wait()
 
 }
